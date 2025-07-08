@@ -36,3 +36,17 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./app
+      
+      - name: Send email alert to users
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Deploy Automation Alert"
+          body: "Test and Deploy workflow completed with status: ${{ job.status }}"
+          to: lalithareddy711@gmail.com, keerthybreddy@gmail.com
+          from: "Keerthy Reddy <keerthybreddy@gmail.com>"
