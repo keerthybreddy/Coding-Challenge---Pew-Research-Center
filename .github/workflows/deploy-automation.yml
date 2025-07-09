@@ -55,7 +55,7 @@ jobs:
         if: always()
         run: |
           curl -X POST -H 'Content-type: application/json' \
-            --data '{"text":"Test and Deploy workflow completed with status --> $JOB_STATUS"}' \
+            --data '{"text":"Test and Deploy workflow completed with status: '"$JOB_STATUS"'"}' \
             ${{ secrets.SLACK_WEBHOOK_URL }}
         env:
           JOB_STATUS: ${{ job.status }}
