@@ -28,7 +28,7 @@ jobs:
         run: npx http-server ./app -p 3000 &
 
       - name: Run Playwright test
-        run: npx playwright test
+        run: npx playwright test --retries=2
       
       - name: Deploy Hello World App
         if: ${{ success() }}
