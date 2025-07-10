@@ -1,35 +1,48 @@
 name: Test and Deploy Hello World App
 
+# specifies that the workflow will only run on a manual trigger
 on: 
   workflow_dispatch:
 
 jobs:
   test-and-deploy:
+
+    # specifies the type of virtual machine to run on, ubuntu-latest is usually the default
     runs-on: ubuntu-latest
+
+    # provide write permissions to the repo, required to use pre-defined GitHub actions such as peaceiris/actions-gh-pages to push changes to a gh-pages branch and deploy it on GitHub pages
     permissions:
       contents: write
 
     steps:
+
+      # STEP 1 --> checkout code from the repo onto the runner defined above
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # STEP 2 --> Set up Node.js on the runner
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # STEP 3 --> Install all required dependencies as defined in package.json
       - name: Install dependencies
         run: npm install
 
+      #  STEP 4 --> Install browsers required for Playwright testing
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
       
+      # STEP 5 --> Start up local server to serve the app on localhost:3000 port, used by Playwright for testing
       - name: Start local server
         run: npx http-server ./app -p 3000 &
 
+      # STEP 6 --> Run Playwright test against the local server, if failing retry up to two times to handle any temporary issues
       - name: Run Playwright test
         run: npx playwright test --retries=2
       
+      # STEP 7 --> If the Playwright test was successful, use peaceiris/actions-gh-pages@v3 pre-built GitHub action to deploy the contents of the ./app directory to GitHub Pages
       - name: Deploy Hello World App
         if: ${{ success() }}
         uses: peaceiris/actions-gh-pages@v3
@@ -37,6 +50,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./app
       
+      # STEP 8 --> Send an email alert using the dawidd6/action-send-mail@v3 pre-built GitHub action with the status of the job (success or failure) using email credentials stored in GitHub Secrets
       - name: Send email alert to users
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -51,6 +65,7 @@ jobs:
           to: lalithareddy711@gmail.com, keerthybreddy@gmail.com
           from: "Keerthy Reddy <keerthybreddy@gmail.com>"
       
+      # STEP 9 --> Send a Slack alert to the to the "all-coding-challenge-test-space" on the "Coding Challenge Test Space" Workspace with the status of the job (success or failure) using Slack WebHook stored in GitHub Secrets
       - name: Send slack alert to users
         if: always()
         run: |
